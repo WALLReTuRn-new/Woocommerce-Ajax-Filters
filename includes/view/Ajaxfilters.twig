@@ -1,0 +1,275 @@
+{# empty Twig template #}
+{{ header }}
+<div id="ajax-filter-settings" class="container">
+    <div class="d-flex align-items-start responsive-tab-menu">
+        <ul class="nav-side nav flex-column nav-pills nav-tabs-dropdown me-3" id="v-pills-tab" role="tablist"
+            aria-orientation="vertical">
+            <li class="nav-item">
+                <a class="" href="#" id="v-pills-general-tab" data-bs-toggle="pill"
+                   data-bs-target="#v-pills-general" role="tab" aria-controls="v-pills-general" aria-selected="true">General</a>
+            </li>
+
+            {% if generalFilterType == 1 %}
+                <li class="nav-item">
+                    <a class="active" href="#" id="v-pills-custom-filters-tab" data-bs-toggle="pill"
+                       data-bs-target="#v-pills-custom-filters" role="tab" aria-controls="v-pills-custom-filters"
+                       aria-selected="false">Custom Filters</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="" href="#" id="v-pills-default-filters-tab" data-bs-toggle="pill"
+                       data-bs-target="#v-pills-default-filters" role="tab" aria-controls="v-pills-default-filters"
+                       aria-selected="false">Default Filters</a>
+                </li>
+            {% endif %}
+
+            <li class="nav-item">
+                <a class="" href="#" id="v-pills-advanced-settings-tab" data-bs-toggle="pill"
+                   data-bs-target="#v-pills-advanced-settings" role="tab" aria-controls="v-pills-advanced-settings"
+                   aria-selected="false">Advanced Settings</a>
+            </li>
+        </ul>
+        <div class="tab-content responsive-tab-content" id="v-pills-tabContent">
+            <div class="tab-pane fade" id="v-pills-general" role="tabpanel" aria-labelledby="v-pills-general-tab" tabindex="0">
+                <div class="container">
+
+                    <form  id="general-settings" class="form-horizontal" action="update_general_settings" method="post" data-toggle="ajax">
+                        <div class="row">
+
+                            <div class="form-group col-md-6">
+                                <label for="inputStatus">Status</label>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <select name="general[status]" id="inputStatus" class="form-control">
+                                    {% if generalStatus == 1 %}
+                                        <option value="1" selected>Enable</option>
+                                        <option value="0">Disable</option>
+                                    {% else %}
+                                        <option value="1">Enable</option>
+                                        <option value="0" selected>Disable</option>
+                                    {% endif %}
+
+
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="inputCity">Choose Position where show</label>
+                                <div class="form-control">
+                                    Now show in: {{ generalPosition }}
+                                    {% if generalPosition == 'custom_position_of_ajax_filters'%}
+                                        <p style='padding:10px;'>
+                                            Need Add Manual in you theme where you ask show<br>
+                                            {% set actionString = '<?php do_action("custom_position_of_ajax_filters"); ?>' %}
+                                            {{ actionString|escape }}
+                                        </p>
+                                    {% endif %}
+                                </div>
+
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="inputPosition">Аvailable Position</label>
+                                <select name="general[position]" id="inputPosition" class="form-control">
+                                    {% for availablePosition in availablePositions %}
+                                        {% if generalPosition ==  availablePosition.position %}
+                                            <option value="{{ availablePosition.position }}" selected>{{ availablePosition.name }}</option> 
+                                        {% else %}
+                                            <option value="{{ availablePosition.position }}">{{ availablePosition.name }}</option>
+                                        {% endif %}     
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label>Visible Only</label>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <select name="general[visible]" id="inputVisibl" class="form-control">
+                                    <option value="1" {% if generalVisible == 1 %} selected {% endif %}}>Visible only for Administrators</option>
+                                    <option value="2" {% if generalVisible == 2 %} selected {% endif %}}>Visible for Everyone</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label>Default or Custom Filters</label>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <select name="general[filtertype]" id="inputFilterType" class="form-control">
+                                    <option value="0" {% if generalFilterType == 0 %} selected {% endif %}}>Default Filter</option>
+                                    <option value="1" {% if generalFilterType == 1 %} selected {% endif %}}>Custom Filters</option>
+                                </select>
+                            </div>
+
+
+                        </div>  
+                    </form>
+                    <div class="invalid-feedback"></div>
+                    <div class="valid-feedback"></div>
+                    <button type="submit" form="general-settings" data-bs-toggle="tooltip" title="Update General Settings" class="btn button-primary">Save<i class="fa-solid fa-floppy-disk"></i></button>
+                </div>
+
+            </div>
+
+
+            {% if generalFilterType == 1 %}
+                <div class="tab-pane fade show active" id="v-pills-custom-filters" role="tabpanel" aria-labelledby="v-pills-custom-filters-tab"
+                     tabindex="0">
+                    <div class="container">
+
+                        <form  id="UA" class="form-horizontal" action="Custom_Filters_Settings" method="post" data-toggle="ajax">
+
+
+                            {% for attribute in attributes %}
+
+                                <div class="content-filters row">
+                                    <div class="form-group col-md-8" data-work="{{ attribute.attributes_key }}">
+                                        <label for="inputCity">{{ attribute.attribute_name }}</label>
+                                        <input type="text"  class="form-control" id="inputCity" value="{{ attribute.attributes_key }}" disabled>
+
+                                        <div class="row">
+                                            <div class="col-md-10">
+                                                You must use the same name that is used in the real attribute in the value field,
+                                                <br>
+                                                to add more than one attribute "," must be used between them.(3.5 kW,3.4 kW,3.3 kW)
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button" onclick="addFilters('{{ attribute.attributes_key }}');" data-toggle="tooltip" title="" class="btn btn-primary" data-original-title="Add Filters"><i class="bi bi-plus"></i></button>
+                                            </div>
+                                        </div>
+
+                                        <div id="{{ attribute.attributes_key }}" data-content-filter="{{ attribute.attributes_key }}" class="">
+
+                                            {% set filter_row = 0 %}
+                                            {% for filters in attribute.avaliable_filters %}
+                                                <!--{{ filters.name }}
+                                                {{ filters.slug }}
+                                                {{ filters.value }}
+                                                {{ filters.default_name }}
+                                                {{ filters.type }}-->
+                                                <div id="filter-row-{{ filter_row }}" class="row">
+                                                    <div class="form-group col-md-5">
+                                                        <label for="filters[{{ attribute.attributes_key }}][{{ filter_row }}][filter_name]">Name</label>
+                                                        <input type="text" id="filters[{{ attribute.attributes_key }}][{{ filter_row }}][filter_name]" name="filters[{{ attribute.attributes_key }}][{{ filter_row }}][filter_name]" value="{{ filters.name }}" placeholder="entry_name" class="form-control" />
+                                                    </div>
+                                                    <div class="form-group col-md-5">
+                                                        <label for="filters[{{ attribute.attributes_key }}][{{ filter_row }}][filter_value]">Value</label>
+                                                        <input type="text" id="filters[{{ attribute.attributes_key }}][{{ filter_row }}][filter_value]" name="filters[{{ attribute.attributes_key }}][{{ filter_row }}][filter_value]" placeholder="entry_value" class="form-control" value="{{ filters.default_name }}">
+                                                    </div>
+                                                    <div class="form-group col-md-2">
+                                                        <label class="remove-label" for="filter-row{{ filter_row }}"></label>
+                                                        <button id="filter-row{{ filter_row }}" type="button" onclick="$('#filter-row-{{ filter_row }}').remove();" data-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger remove"><i class="bi bi-dash"></i></button>
+                                                    </div>
+                                                </div>
+                                                {% set filter_row = filter_row + 1 %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label for="inputState">Status</label>
+                                        <select name="status[{{ attribute.attributes_key }}]" id="inputState" class="form-control" data-status-color="{{ attribute.attributes_status }}">
+                                            {% if  attribute.attributes_status == 1%}
+                                                <option value="1" selected>Enable</option>
+                                                <option value="0" >Disable</option>
+                                            {% else %}
+                                                <option value="1" >Enable</option>
+                                                <option value="0" selected>Disable</option>
+                                            {% endif %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                            {% endfor %}
+
+                        </form>
+                        <div class="invalid-feedback"></div>
+                        <div class="valid-feedback"></div>
+                        <button type="submit" form="UA" data-bs-toggle="tooltip" title="Save" class="btn button-primary">Save<i class="fa-solid fa-floppy-disk"></i></button>
+                    </div>
+                </div>        
+            {% else %}
+                <div class="tab-pane fade" id="v-pills-default-filters" role="tabpanel" aria-labelledby="v-pills-default-filters-tab"
+                     tabindex="0">
+                    <div class="container">
+
+                        <form  id="UA" class="form-horizontal" action="Defaul_Filters_Settings" method="post" data-toggle="ajax">
+                            <div class="row">
+
+                                {% for attribute in attributes %}
+
+                                    <div class="form-group col-md-6">
+                                        <label for="inputCity">{{ attribute.attributes_key }}</label>
+                                        <input type="text"  class="form-control" id="inputCity" value="{{ attribute.attributes_key }}" disabled>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label for="inputState">State</label>
+                                        <select name="status[{{ attribute.attributes_key }}]" id="inputState" class="form-control" data-status-color="{{ attribute.attributes_status }}">
+                                            {% if  attribute.attributes_status == 1%}
+                                                <option value="1" selected>Yes</option>
+                                                <option value="0" >No</option>
+                                            {% else %}
+                                                <option value="1" >Yes</option>
+                                                <option value="0" selected>No</option>
+                                            {% endif %}
+                                        </select>
+                                    </div>
+                                {% endfor %}
+                            </div>  
+                        </form>
+                        <div class="invalid-feedback"></div>
+                        <div class="valid-feedback"></div>
+                        <button type="submit" form="UA" data-bs-toggle="tooltip" title="Save" class="btn button-primary">Save<i class="fa-solid fa-floppy-disk"></i></button>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="tab-pane fade" id="v-pills-advanced-settings" role="tabpanel" aria-labelledby="v-pills-advanced-settings-tab"
+                 tabindex="0">Advanced Settings</div>
+        </div>
+    </div>
+
+
+
+
+</div>
+{{ footer }}
+
+<script>
+    /*Custom Filter Value*/
+
+    var filter_row = 0;
+    function addFilters(contentid) {
+
+        var numItems = $('#' + contentid + ' [id^="filter-row-"]').length;
+
+        // if (numItems <= 0) {
+        //    filter_row = 0;
+        // } else {
+        filter_row = numItems;
+        // }
+
+
+
+
+        //$('#saveform').prop('disabled', false).addClass('loading');
+        html = '<div id="filter-row-' + filter_row + '" class="row">';
+        html += '<div class="form-group col-md-5">';
+        html += '<label for="filters[' + contentid + '][' + filter_row + '][filter_name]">Value</label>';
+        html += '<input type="text" id="filters[' + contentid + '][' + filter_row + '][filter_name]" name="filters[' + contentid + '][' + filter_row + '][filter_name]" value="" placeholder="entry_name" class="form-control" />';
+        html += '</div>';
+        html += '<div class="form-group col-md-5">';
+        html += '<label for="filters[' + contentid + '][' + filter_row + '][filter_value]">Value</label>';
+        html += '<input type="text" id="filters[' + contentid + '][' + filter_row + '][filter_value]" name="filters[' + contentid + '][' + filter_row + '][filter_value]" value="" placeholder="entry_value" class="form-control">';
+        html += '</div>';
+        html += '<div class="form-group col-md-2">';
+        html += '<label class="remove-label" for="filter-row' + filter_row + '"> </label>';
+        html += '<button id="filter-row' + filter_row + '" type="button" onclick="$(\'#filter-row-' + filter_row + '\').remove();" data-toggle="tooltip" title="Remove This" class="btn btn-danger remove"><i class="bi bi-dash"></i></button>';
+        html += '</div>';
+        html += '</div>';
+        $('#' + contentid).append(html);
+        filter_row++;
+        //NetteTinyMCE();
+    }
+    ;
+
+    /*Custom Filter Value*/
+</script>
